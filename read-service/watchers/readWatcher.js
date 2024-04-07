@@ -1,7 +1,6 @@
 const { consumeMessageFromQueue } = require('../common-modules/messageQueueService');
 const queueNames = require('../common-modules/messageQueueNames');
 const Target = require('../models/target');
-const Shot = require('../models/shot');
 
 // This callback function will process messages received from the queue.
 async function targetInDb(message) {
@@ -65,80 +64,6 @@ async function targetDelDb(message) {
     }
 }
 
-async function shotInDb(message) {
-    try {
-        const shotData = JSON.parse(message);
-
-        const newShot = new Shot({
-            _id: shotData._id,
-            targetId: shotData.targetId,
-            status: shotData.status,
-            imageUrl: shotData.imageUrl,
-            shooterId: shotData.shooterId,
-            score: shotData.score,
-        });
-
-        // Save the new shot to the database
-        const savedShot = await newShot.save();
-        console.log('Shot saved successfully:', savedShot);
-    } catch (error) {
-        console.error('Error processing message:', error);
-    }
-}
-
-async function shotUpDb(message) {
-    try {
-        const shotData = JSON.parse(message);
-
-        const updatedShot = {
-            targetId: shotData.targetId,
-            status: shotData.status,
-            imageUrl: shotData.imageUrl,
-            shooterId: shotData.shooterId,
-            score: shotData.score,
-        };
-
-        // Update the shot in the database
-        const result = await Shot.findByIdAndUpdate(shotData._id, updatedShot);
-
-        console.log('Shot updated successfully:', result);
-    } catch (error) {
-        console.error('Error processing message:', error);
-    }
-}
-
-async function shotDelDb(message) {
-    try {
-        const shotData = JSON.parse(message);
-
-        // Delete the shot from the database
-        const result = await Shot.findByIdAndDelete(shotData._id);
-
-        console.log('Shot deleted successfully:', result);
-    } catch (error) {
-        console.error('Error processing message:', error);
-    }
-}
-
-async function shotScoreUpDb(message) {
-    try {
-        const shotData = JSON.parse(message);
-
-        // Check if the shot exists in the database
-        const shot = await Shot.findById(shotData._id);
-
-        if (shot) {
-            // If the shot exists, update its score
-            shot.score = shotData.score;
-            const result = await shot.save();
-            console.log('Shot score updated successfully:', result);
-        } else {
-            console.log('No shot found with id:', shotData._id);
-        }
-    } catch (error) {
-        console.error('Error processing message:', error);
-    }
-}
 
 
 function start() {
@@ -146,11 +71,7 @@ function start() {
         consumeMessageFromQueue('targetCreate', targetInDb);
         consumeMessageFromQueue('targetUpdate', targetUpDb);
         consumeMessageFromQueue('targetDelete', targetDelDb);
-        consumeMessageFromQueue('shotCreate', shotInDb);
-        consumeMessageFromQueue('shotUpdate', shotUpDb);
-        consumeMessageFromQueue('shotDelete', shotDelDb);
-        consumeMessageFromQueue('shotScoreUpdate', shotScoreUpDb);
-        console.log('Consuming messages from the queue:', queueNames.targetCreate, queueNames.targetUpdate, queueNames.targetDelete, queueNames.shotCreate, queueNames.shotUpdate, queueNames.shotDelete, queueNames.shotScoreUpdate);
+        console.log('Consuming messages from the queue:', queueNames.targetCreate, queueNames.targetUpdate, queueNames.targetDelete);
     }, 10000);
 }
 
