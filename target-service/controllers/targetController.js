@@ -21,8 +21,6 @@ async function createTarget(req, res) {
             throw new Error('Image is required');
         }
 
-        target.ownerId = req.user.userId;
-
         await target.validate();
         await target.save();
 
@@ -42,13 +40,6 @@ async function updateTarget(req, res) {
         const target = await Target.findById(req.params.id);
         if (!target) {
             return res.status(404).json({ error: 'Target not found' });
-        }
-
-        console.log('target:', target);
-        console.log('req.user.userId:', req.user.userId);
-
-        if (target.ownerId !== req.user.userId) {
-            return res.status(403).json({ error: 'You are not the owner of this target' });
         }
 
         const updatedTarget = new Target(req.body);
@@ -74,11 +65,7 @@ async function deleteTarget(req, res) {
         if (!target) {
             return res.status(404).json({ error: 'Target not found' });
         }
-
-        if (target.ownerId !== req.user.userId) {
-            return res.status(403).json({ error: 'You are not the owner of this target' });
-        }
-
+        
         await Target.findByIdAndDelete(req.params.id);
         sendMessageToQueue(queueOptions.targetDelete, target.toObject());
         res.status(200).json({ target, message: 'Successfully deleted target' });

@@ -1,10 +1,6 @@
 const mongoose = require('../common-modules/mongoDBConnection');
 
 const TargetSchema = new mongoose.Schema({
-    ownerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    },
     latitude: {
         type: Number,
         required: true,
