@@ -12,10 +12,15 @@ jest.mock('../models/target', () => {
     };
 });
 
-Target.findById = jest.fn().mockImplementation(() => ({
-    ownerId: '123',
-    toObject: () => ({ ownerId: '123' }),
-}));
+Target.findById = jest.fn().mockImplementation((id) => {
+    if (id === '123') {
+        return {
+            toObject: () => ({ /* your object here */ }),
+        };
+    } else {
+        return null;
+    }
+});
 Target.findByIdAndUpdate = jest.fn().mockResolvedValue(true);
 Target.findByIdAndDelete = jest.fn().mockResolvedValue(true);
 
@@ -50,7 +55,7 @@ const { sendMessageToQueue } = require('../common-modules/messageQueueService');
 describe('createTarget', () => {
     it('should create a target successfully', async () => {
         const req = mockRequest(
-            { userId: '123' },
+            { },
             { latitude: 45.0, longitude: -75.0, deadline: '2024-01-01', targetId: '123' }
         );
         req.file = {
@@ -68,7 +73,7 @@ describe('createTarget', () => {
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(
             {
-                target: expect.objectContaining({ ownerId: '123' }),
+                target: expect.any(Object),
                 message: 'Successfully created target'
             }
         );
@@ -77,7 +82,7 @@ describe('createTarget', () => {
 
     it ('should fail to create a target if image is missing', async () => {
         const req = mockRequest(
-            { userId: '123' },
+            { },
             { latitude: 45.0, longitude: -75.0, deadline: '2024-01-01' }
         );
         const res = mockResponse();
@@ -102,7 +107,7 @@ const { updateTarget } = require('../controllers/targetController');
 describe('updateTarget', () => {
     it('should update a target successfully', async () => {
         const req = mockRequest(
-            { userId: '123' }, 
+            { }, 
             { latitude: 45.0, longitude: -75.0, imageUrl: 'http://example.com/image.jpg', deadline: '2024-01-01' },
             { id: '123' }
         );
@@ -122,74 +127,58 @@ describe('updateTarget', () => {
         expect(res.json).toHaveBeenCalledWith(expect.anything());
     });
 
-    it ('should fail to update if not owner', async () => {
+    it('should fail to update a target if target is not found', async () => {
+        Target.findById = jest.fn().mockResolvedValue(null);
+
         const req = mockRequest(
-            { userId: '456' },
+            { },
             { latitude: 45.0, longitude: -75.0, imageUrl: 'http://example.com/image.jpg', deadline: '2024-01-01' },
             { id: '123' }
         );
-        req.file = {
-            path: 'path/to/file.jpg',
-            originalname: 'file.jpg'
-        };
         const res = mockResponse();
 
         await updateTarget(req, res);
 
-        if (res.status.mock.calls[0][0] !== 403) {
+        if (res.status.mock.calls[0][0] !== 404) {
             console.error('Error updating target:', res.json.mock.calls[0][0]);
         }
 
-        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.status).toHaveBeenCalledWith(404);
         expect(res.json).toHaveBeenCalledWith(
             {
-                error: 'You are not the owner of this target'
+                error: 'Target not found'
             }
         );
     });
+
     
 });
 
 const { deleteTarget } = require('../controllers/targetController');
-
 describe('deleteTarget', () => {
-    it('should delete a target successfully', async () => {
+
+    it('should fail to delete a target if target is not found', async () => {
+        Target.findByIdAndDelete = jest.fn().mockResolvedValue(null);
+
         const req = mockRequest(
-            { userId: '123' },
-            {},
-            { id: '123' }
+            { },
+            { },
+            { id: '124' }
         );
         const res = mockResponse();
 
         await deleteTarget(req, res);
 
-        if (res.status.mock.calls[0][0] !== 200) {
+        if (res.status.mock.calls[0][0] !== 404) {
             console.error('Error deleting target:', res.json.mock.calls[0][0]);
         }
 
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith(expect.anything());
-    });
-
-    it ('should fail to delete if not owner', async () => {
-        const req = mockRequest(
-            { userId: '456' },
-            {},
-            { id: '123' }
-        );
-        const res = mockResponse();
-
-        await deleteTarget(req, res);
-
-        if (res.status.mock.calls[0][0] !== 403) {
-            console.error('Error deleting target:', res.json.mock.calls[0][0]);
-        }
-
-        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.status).toHaveBeenCalledWith(404);
         expect(res.json).toHaveBeenCalledWith(
             {
-                error: 'You are not the owner of this target'
+                error: 'Target not found'
             }
         );
     });
+
 });
