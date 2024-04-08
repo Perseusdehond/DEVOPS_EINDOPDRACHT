@@ -48,6 +48,6 @@ const TargetSchema = new mongoose.Schema({
 
 TargetSchema.index({ location: '2dsphere' });
 
-const Target = mongoose.model('targetsdevops', TargetSchema);
+const Target = mongoose.model('targets', TargetSchema);
 
 module.exports = Target;
