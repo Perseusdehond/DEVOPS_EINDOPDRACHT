@@ -1,22 +1,20 @@
 const mongoose = require('mongoose');
-const mongoDBurl = process.env.MONGODB_URL || 'mongodb://mongodb:27018/targetsdevops';
+const mongoDBurl = process.env.MONGODB_URL || 'mongodb://mongodb:27017/targets';
 
 function connectWithRetry() {
     return mongoose.connect(mongoDBurl)
         .then(() => {
-            console.log('Connected to MongoDB at', mongoDBurl);
+            console.log('1. Connected to MongoDB at ', mongoDBurl);
         })
         .catch(err => {
-            console.error('Failed to connect to MongoDB on startup:', err);
-            console.log('Retrying connection in 5 seconds...');
+            console.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
             setTimeout(connectWithRetry, 5000);
         });
 }
 
+
 connectWithRetry();
 
-mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);
-});
+console.log('2. Connected to MongoDB at ', mongoDBurl);
 
 module.exports = mongoose;
