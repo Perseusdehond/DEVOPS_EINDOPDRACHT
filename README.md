@@ -1,4 +1,4 @@
-Devops Public Repo for DevOps
+Devops Public Repo
 
 Workflow Actions below:
 
