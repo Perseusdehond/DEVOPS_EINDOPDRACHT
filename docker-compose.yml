@@ -87,6 +87,7 @@ services:
       - default
     volumes:
       - ./read-service:/usr/src/app
+      - /usr/src/app/node_modules
     env_file:
       - ./envFiles/read-service.env
     deploy:
