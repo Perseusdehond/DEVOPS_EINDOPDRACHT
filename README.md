@@ -7,4 +7,4 @@ Workflow Actions below:
 [![Read Service CI](https://github.com/Perseusdehond/DEVOPS_EINDOPDRACHT/actions/workflows/read-service.yml/badge.svg)](https://github.com/Perseusdehond/DEVOPS_EINDOPDRACHT/actions/workflows/read-service.yml)
 
 Door:
-Mees Hurenkamp en JanWillem Woolderink
+Mees Hurenkamp (2187257) en JanWillem Woolderink (2185908)

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const mongoDBurl = process.env.MONGODB_URL || 'mongodb://mongodb:27017/scores';
+const mongoDBurl = process.env.MONGODB_URL || 'mongodb://mongodb:27017/readers';
 
 function connectWithRetry() {
     return mongoose.connect(mongoDBurl)
