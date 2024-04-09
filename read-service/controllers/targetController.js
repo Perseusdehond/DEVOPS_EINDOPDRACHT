@@ -3,7 +3,7 @@ const Target = require('../models/target');
 
 async function getTarget(req, res) {
     try {
-        const target = await Target.findById(req.params.id).exec();
+        const target = await Target.findById(req.params.id);
         res.status(200).json({ target, message: 'Successfully retrieved target' });
     } catch (error) {
         res.status(500).json({ error: error.message });
